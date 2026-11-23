@@ -1,0 +1,28 @@
+# Dependencies
+ node_modules/
+
+ # Runtime data and local databases
+ vpn_data.db
+ vpn_data.db-*
+ vpn_data.json
+ config/client_keys.json
+ config/wg0.conf
+ *.log
+ ghostlink.log
+
+ # Generated Tor runtime
+ tor/
+
+ # OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+ # Environment and secrets
+.env
+.env.*
+*.pem
+*.key

@@ -1,0 +1,20 @@
+{
+  "name": "ghostlink",
+  "version": "2.0.0",
+  "description": "GHOSTLINK - Anonymous Browsing System with Automatic Tor Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["tor", "anonymity", "privacy", "vpn", "proxy"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.5.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "socks": "^2.8.7",
+    "socks-proxy-agent": "^8.0.5"
+  }
+}

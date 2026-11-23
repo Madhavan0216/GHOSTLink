@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHOSTLINK Onion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">GHOST<span style="color:#fff">LINK</span> <span class="badge">ONION V1</span></div>
+            <div class="status-indicator" id="status-indicator">UNSECURED</div>
+        </header>
+
+        <main>
+            <!-- Circuit Visualization -->
+            <div class="circuit-display" id="circuit-display">
+                <div class="node-icon client">YOU</div>
+                <div class="connection-line"></div>
+                <div class="node-icon unknown">?</div>
+                <div class="connection-line"></div>
+                <div class="node-icon unknown">?</div>
+                <div class="connection-line"></div>
+                <div class="node-icon unknown">?</div>
+                <div class="connection-line"></div>
+                <div class="node-icon internet">WEB</div>
+            </div>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-body" id="console-output">
+                    <p class="log-line">GHOSTLINK initialized...</p>
+                    <p class="log-line">Ready to build anonymity circuit.</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="onion-connect-btn" class="cyber-btn">
+                    <span class="btn-text">BUILD CIRCUIT</span>
+                    <span class="glitch-effect"></span>
+                </button>
+                <button id="onion-disconnect-btn" class="cyber-btn hidden"
+                    style="border-color: #ff0033; color: #ff0033;">
+                    <span class="btn-text">STOP CIRCUIT</span>
+                    <span class="glitch-effect"></span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Browser Interface -->
+    <div class="browser-interface hidden" id="browser-interface">
+        <div class="browser-top-bar">
+            <div class="tab-bar">
+                <div class="tab active">
+                    <span class="tab-icon">🔗</span>
+                    <span class="tab-title">New Tab</span>
+                    <span class="tab-close">×</span>
+                </div>
+                <div class="new-tab-btn">+</div>
+            </div>
+            <div class="nav-bar">
+                <div class="nav-controls">
+                    <button class="nav-btn">←</button>
+                    <button class="nav-btn">→</button>
+                    <button class="nav-btn">↻</button>
+                </div>
+                <div class="address-bar">
+                    <span class="security-icon">🔒</span>
+                    <input type="text" value="https://check.torproject.org/" placeholder="Enter URL or search...">
+                    <span class="onion-badge">ONION</span>
+                </div>
+                <div class="menu-controls">
+                    <button class="nav-btn" id="toggle-panel-btn" title="Toggle GhostLink Panel">◈</button>
+                    <button class="nav-btn" id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+                    <div class="menu-dropdown-container">
+                        <button class="nav-btn" id="menu-btn" title="Menu">⋮</button>
+                        <div class="menu-dropdown" id="browser-menu">
+                            <div class="menu-section">
+                                <button class="menu-item" id="menu-new-tab"><span class="menu-icon">+</span> New tab <span class="menu-shortcut">Alt+T</span></button>
+                                <button class="menu-item" id="menu-new-identity"><span class="menu-icon">↻</span> New Identity <span class="menu-shortcut">Alt+U</span></button>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section zoom-section">
+                                <span class="menu-label"><span class="menu-icon">◎</span> Zoom</span>
+                                <div class="zoom-controls">
+                                    <button class="zoom-btn" id="menu-zoom-out">−</button>
+                                    <span class="zoom-level" id="zoom-level-display">100%</span>
+                                    <button class="zoom-btn" id="menu-zoom-in">+</button>
+                                    <button class="zoom-btn" id="menu-zoom-reset" title="Reset">↺</button>
+                                </div>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section">
+                                <button class="menu-item" id="menu-bookmarks"><span class="menu-icon">☆</span> Favorites <span class="menu-shortcut">Alt+B</span></button>
+                                <button class="menu-item" id="menu-history"><span class="menu-icon">◷</span> History <span class="menu-shortcut">Alt+Y</span></button>
+                                <button class="menu-item" id="menu-downloads"><span class="menu-icon">↓</span> Downloads <span class="menu-shortcut">Alt+J</span></button>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section">
+                                <button class="menu-item" id="menu-clear-data"><span class="menu-icon">⌫</span> Delete browsing data <span class="menu-shortcut">Alt+Del</span></button>
+                                <button class="menu-item" id="menu-print"><span class="menu-icon">⎙</span> Print <span class="menu-shortcut">Alt+P</span></button>
+                                <button class="menu-item" id="menu-screenshot"><span class="menu-icon">⌗</span> Screenshot <span class="menu-shortcut">Alt+S</span></button>
+                                <button class="menu-item" id="menu-find"><span class="menu-icon">⌕</span> Find on page <span class="menu-shortcut">Alt+G</span></button>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section">
+                                <button class="menu-item has-submenu" id="menu-more-tools"><span class="menu-icon">⚒</span> More tools <span class="menu-arrow">▸</span></button>
+                                <div class="submenu" id="more-tools-submenu">
+                                    <button class="menu-item" id="menu-save-page"><span class="menu-icon">⤓</span> Save page as...</button>
+                                    <button class="menu-item" id="menu-view-source"><span class="menu-icon">⟨/⟩</span> View page source</button>
+                                    <button class="menu-item" id="menu-dev-tools"><span class="menu-icon">⚙</span> Developer tools</button>
+                                </div>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section">
+                                <button class="menu-item" id="menu-security"><span class="menu-icon">⛨</span> Security settings</button>
+                                <button class="menu-item" id="menu-settings"><span class="menu-icon">⚙</span> Settings</button>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-section">
+                                <button class="menu-item has-submenu" id="menu-help"><span class="menu-icon">?</span> Help and feedback <span class="menu-arrow">▸</span></button>
+                                <div class="submenu" id="help-submenu">
+                                    <button class="menu-item" id="menu-about"><span class="menu-icon">ⓘ</span> About GHOSTLINK</button>
+                                    <button class="menu-item" id="menu-keyboard-shortcuts"><span class="menu-icon">⌨</span> Keyboard shortcuts</button>
+                                    <button class="menu-item" id="menu-tor-docs"><span class="menu-icon">⧉</span> Tor documentation</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="browser-content">
+            <!-- Find Bar -->
+            <div class="find-bar" id="find-bar">
+                <input type="text" id="find-input" placeholder="Find in page...">
+                <span class="find-bar-info" id="find-info">0/0</span>
+                <button id="find-prev" title="Previous">↑</button>
+                <button id="find-next" title="Next">↓</button>
+                <button id="find-close" title="Close">×</button>
+            </div>
+            
+            <div class="welcome-screen">
+                <div class="browser-logo">GHOSTLINK</div>
+                <p class="browser-status">Connected via Encrypted Circuit</p>
+                <div class="search-box-container">
+                    <input type="text" class="main-search-input" placeholder="Search with DuckDuckGo or enter URL">
+                    <button class="search-btn">SEARCH</button>
+                </div>
+                <div class="shortcuts">
+                    <div class="shortcut" data-url="https://duckduckgo.com">
+                        <div class="shortcut-icon">🦆</div>
+                        <span>DuckDuckGo</span>
+                    </div>
+                    <div class="shortcut" data-url="https://check.torproject.org/">
+                        <div class="shortcut-icon">🛡️</div>
+                        <span>Check IP</span>
+                    </div>
+                    <div class="shortcut" data-url="https://www.startpage.com">
+                        <div class="shortcut-icon">🔍</div>
+                        <span>Startpage</span>
+                    </div>
+                    <div class="shortcut" data-url="https://proton.me">
+                        <div class="shortcut-icon">📧</div>
+                        <span>ProtonMail</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bookmarks Modal -->
+    <div class="modal-overlay" id="bookmarks-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⭐ Bookmarks</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="bookmarks-list">
+                <div class="empty-state">
+                    <div class="icon">⭐</div>
+                    <p>No bookmarks yet</p>
+                    <p style="font-size: 0.85rem;">Press Ctrl+D to bookmark a page</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- History Modal -->
+    <div class="modal-overlay" id="history-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📜 History</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="history-list">
+                <div class="empty-state">
+                    <div class="icon">📜</div>
+                    <p>No history</p>
+                    <p style="font-size: 0.85rem;">History is cleared when circuit stops</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Downloads Modal -->
+    <div class="modal-overlay" id="downloads-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📥 Downloads</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="downloads-list">
+                <div class="empty-state">
+                    <div class="icon">📥</div>
+                    <p>No downloads</p>
+                    <p style="font-size: 0.85rem;">Downloads are cleared on disconnect</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Settings Modal -->
+    <div class="modal-overlay" id="security-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛡️ Security Settings</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label>
+                        <span>HTTPS-First Mode</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-https-first" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label>
+                        <span>HTTPS-Only Mode</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-https-only">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label>
+                        <span>Onion-Only Mode</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-onion-only">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label>
+                        <span>Block Mixed Content</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-mixed-content" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label>
+                        <span>First-Party Isolation</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-fp-isolation" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                </div>
+                <p style="color: #666; font-size: 0.8rem;">Changes apply immediately. All data cleared on disconnect.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- About Modal -->
+    <div class="modal-overlay" id="about-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ℹ️ About GHOSTLINK</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 2.5rem; color: var(--accent-color); font-family: 'Courier New', monospace; font-weight: bold;">GHOSTLINK</div>
+                    <p style="color: #888; margin: 5px 0;">ONION V1</p>
+                </div>
+                <p><strong>Version:</strong> 1.0.0</p>
+                <p><strong>Engine:</strong> Tor 0.4.8.10</p>
+                <p><strong>Privacy:</strong> Tor Browser-level parity</p>
+                <p style="margin-top: 20px; color: #888; font-size: 0.85rem;">
+                    GHOSTLINK routes all traffic through the Tor network, providing anonymous browsing with first-party isolation, 
+                    HTTPS-First mode, and automatic data clearing on disconnect.
+                </p>
+                <p style="color: #666; font-size: 0.8rem; margin-top: 15px;">
+                    ⚠️ Remember: No system provides 100% anonymity. Practice safe browsing habits.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Clear Data Confirmation Modal -->
+    <div class="modal-overlay" id="clear-data-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🗑️ Clear Browsing Data</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This will clear all browsing data:</p>
+                <ul style="color: #ccc; margin: 15px 0; padding-left: 20px;">
+                    <li>All open tabs</li>
+                    <li>Browsing history</li>
+                    <li>Cookies and session data</li>
+                    <li>Cached content</li>
+                </ul>
+                <p style="color: #ff6b6b;">This action cannot be undone.</p>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="clear-data-confirm" style="flex: 1; padding: 12px; background: #ff4444; border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold;">Clear All Data</button>
+                    <button id="clear-data-cancel" style="flex: 1; padding: 12px; background: #333; border: none; color: #fff; border-radius: 6px; cursor: pointer;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>⚙️ Settings</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Appearance</h4>
+                    <label class="settings-row">
+                        <span>Theme</span>
+                        <select id="setting-theme" class="settings-select">
+                            <option value="dark" selected>Dark (Default)</option>
+                            <option value="light">Light</option>
+                            <option value="hacker">Hacker Green</option>
+                        </select>
+                    </label>
+                    <label class="settings-row">
+                        <span>Default Zoom</span>
+                        <select id="setting-default-zoom" class="settings-select">
+                            <option value="75">75%</option>
+                            <option value="100" selected>100%</option>
+                            <option value="125">125%</option>
+                            <option value="150">150%</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-section">
+                    <h4>Privacy</h4>
+                    <label class="settings-row">
+                        <span>Clear data on exit</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-clear-on-exit" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label class="settings-row">
+                        <span>Block fingerprinting</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="setting-block-fingerprint" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="settings-section">
+                    <h4>Search</h4>
+                    <label class="settings-row">
+                        <span>Default Search Engine</span>
+                        <select id="setting-search-engine" class="settings-select">
+                            <option value="duckduckgo" selected>DuckDuckGo</option>
+                            <option value="ahmia">Ahmia (Onion)</option>
+                            <option value="torch">Torch (Onion)</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-section">
+                    <h4>Network</h4>
+                    <label class="settings-row">
+                        <span>Request new circuit every</span>
+                        <select id="setting-circuit-time" class="settings-select">
+                            <option value="10">10 minutes</option>
+                            <option value="15" selected>15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="0">Never (manual only)</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal-overlay" id="shortcuts-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-category">
+                        <h4>Navigation</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>T</kbd> <span>New tab</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>W</kbd> <span>Close tab</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Tab</kbd> <span>Next tab</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>L</kbd> <span>Focus address bar</span></div>
+                        <div class="shortcut-item"><kbd>Alt</kbd> + <kbd>←</kbd> <span>Go back</span></div>
+                        <div class="shortcut-item"><kbd>Alt</kbd> + <kbd>→</kbd> <span>Go forward</span></div>
+                        <div class="shortcut-item"><kbd>F5</kbd> <span>Reload page</span></div>
+                    </div>
+                    <div class="shortcut-category">
+                        <h4>Page Actions</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>F</kbd> <span>Find on page</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>P</kbd> <span>Print</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>D</kbd> <span>Bookmark page</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>+</kbd> <span>Zoom in</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>-</kbd> <span>Zoom out</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>0</kbd> <span>Reset zoom</span></div>
+                    </div>
+                    <div class="shortcut-category">
+                        <h4>Privacy & Security</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>U</kbd> <span>New identity</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> <span>Clear browsing data</span></div>
+                    </div>
+                    <div class="shortcut-category">
+                        <h4>Panels</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>H</kbd> <span>History</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>J</kbd> <span>Downloads</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>O</kbd> <span>Favorites</span></div>
+                        <div class="shortcut-item"><kbd>F11</kbd> <span>Toggle fullscreen</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+
+</html>

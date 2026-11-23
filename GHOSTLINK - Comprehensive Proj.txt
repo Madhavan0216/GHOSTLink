@@ -1,0 +1,411 @@
+# 📋 GHOSTLINK - Comprehensive Project Analysis Report
+
+## 🎯 **Project Overview**
+
+| Property | Details |
+|----------|---------|
+| **Project Name** | GHOSTLINK Onion V1 |
+| **Type** | Privacy/Anonymity Network Simulation |
+| **Concept** | Tor-like Onion Routing VPN Client |
+| **Language** | JavaScript (Node.js + Vanilla Frontend) |
+| **Current Status** | ✅ Running at `http://localhost:3000` |
+
+---
+
+## 📁 **Complete File Structure**
+
+```
+NewProJ/
+├── config/
+│   └── client_keys.json          # Stores generated cryptographic keys
+├── public/
+│   ├── index.html                # Main UI (Cyberpunk-themed interface)
+│   ├── app.js                    # Frontend JavaScript (544 lines)
+│   ├── style.css                 # Main styles (780 lines)
+│   └── temp_style.css            # Additional browser interface styles (276 lines)
+├── remote_server/
+│   ├── README.md                 # VPS deployment instructions
+│   └── vpn_server_node.js        # WireGuard server setup script (Linux)
+├── db.js                         # SQLite database operations
+├── package.json                  # Project dependencies
+├── relay_server.js               # SOCKS5 relay node implementation
+├── server.js                     # Main Express backend (API server)
+├── vpn_controller.js             # Key generation & WireGuard config
+└── vpn_data.db                   # SQLite database file (auto-generated)
+```
+
+---
+
+## 🔧 **Technology Stack**
+
+### **Backend Dependencies** (package.json)
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `express` | ^5.2.1 | Web framework for REST API |
+| `cors` | ^2.8.5 | Cross-Origin Resource Sharing |
+| `better-sqlite3` | ^12.5.0 | SQLite database driver |
+| `socks` | ^2.8.7 | SOCKS protocol implementation |
+| `socks-proxy-agent` | ^8.0.5 | SOCKS proxy agent for HTTP |
+
+### **Frontend Technologies**
+- Vanilla JavaScript (ES6+)
+- CSS3 with CSS Variables
+- HTML5 Fullscreen API
+
+---
+
+## 🖥️ **Backend Components**
+
+### **1. Main Server** (server.js)
+- **Port**: 3000
+- **Features**:
+  - Static file serving from public
+  - CORS enabled
+  - RESTful API endpoints
+
+#### **API Endpoints**:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/status` | Returns VPN connection status & active circuit |
+| `POST` | `/api/setup` | Generates X25519 key pair for client |
+| `GET` | `/api/servers` | Lists all saved VPN servers |
+| `POST` | `/api/servers` | Adds a new VPN server |
+| `POST` | `/api/connect_onion` | Simulates 3-hop circuit establishment |
+| `POST` | `/api/disconnect` | Tears down the active circuit |
+
+#### **Circuit Node Simulation** (Hardcoded mock nodes):
+```javascript
+[
+    { id: 1, ip: '192.168.1.10', name: 'Ghost-Entry-Alpha' },
+    { id: 2, ip: '10.0.0.5', name: 'Ghost-Relay-Beta' },
+    { id: 3, ip: '172.16.0.8', name: 'Ghost-Exit-Gamma' }
+]
+```
+
+---
+
+### **2. Database Layer** (db.js)
+- **Database Engine**: SQLite (`better-sqlite3`)
+- **Database File**: vpn_data.db (created on first run)
+
+#### **Tables**:
+
+**`settings` Table**
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-generated |
+| `key_name` | TEXT | Setting identifier |
+| `value` | TEXT | Setting value |
+
+**`servers` Table**
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-increment |
+| `name` | TEXT | Server name |
+| `endpoint` | TEXT | Server address:port |
+| `public_key` | TEXT | WireGuard public key |
+| `allowed_ips` | TEXT | IP ranges (default: 0.0.0.0/0) |
+| `is_active` | INTEGER | Active status flag |
+
+#### **Database Functions**:
+- `initDb()` - Creates tables if not exists
+- `saveServer(name, endpoint, publicKey, allowedIps)` - Insert server
+- `getServers()` - Fetch all servers
+- `saveSetting(key, value)` - Upsert setting
+- `getSetting(key)` - Retrieve setting
+
+---
+
+### **3. VPN Controller** (vpn_controller.js)
+- **Key Generation**: Uses Node.js `crypto` module with X25519 curve
+- **Config Directory**: config
+
+#### **Functions**:
+| Function | Purpose |
+|----------|---------|
+| `generateKeyPair()` | Generates mock WireGuard-compatible keys (base64 encoded 32 bytes) |
+| `createConfigFile(serverPublicKey, endpoint, clientIp)` | Generates WireGuard config file `wg0.conf` |
+
+#### **Generated Config Format** (`config/wg0.conf`):
+```ini
+[Interface]
+PrivateKey = <base64_private_key>
+Address = <clientIp>/32
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = <serverPublicKey>
+Endpoint = <endpoint>
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
+```
+
+---
+
+### **4. Relay Server** (relay_server.js)
+- **Port**: 9050 (Standard Tor SOCKS port)
+- **Protocol**: Custom "Ghost" binary protocol
+- **Purpose**: Acts as a network relay node (Tor-like hop)
+
+#### **Packet Format**:
+```
+[1 byte: IP Length][N bytes: Target IP][2 bytes: Target Port (Big Endian)][Payload...]
+```
+
+#### **Flow**:
+1. Receives connection
+2. Parses target IP/port from first data packet
+3. Forwards data to target
+4. Pipes bidirectional data streams
+
+---
+
+### **5. Remote VPN Server** (vpn_server_node.js)
+- **Target OS**: Linux (Ubuntu)
+- **Interface**: `wg0`
+- **Listen Port**: 51820 (WireGuard default)
+- **Server IP**: 10.0.0.1/24
+
+#### **Features**:
+- Auto-generates server key pair in `/etc/wireguard/`
+- Configures NAT masquerading via iptables
+- Supports adding peers dynamically
+
+#### **Deployment Requirements** (README.md):
+1. VPS with Ubuntu 20.04/22.04
+2. WireGuard installed (`apt install wireguard`)
+3. Node.js installed
+4. Run with `sudo node vpn_server_node.js`
+
+---
+
+## 🎨 **Frontend Components**
+
+### **1. HTML Structure** (index.html)
+
+#### **Main Sections**:
+1. **Header**: Logo + Status Indicator
+2. **Circuit Display**: Visual node chain (YOU → ENTRY → RELAY → EXIT → WEB)
+3. **Terminal Window**: Console-style log output
+4. **Control Buttons**: BUILD CIRCUIT / STOP CIRCUIT
+5. **Browser Interface**: Full-featured mock browser (hidden initially)
+
+#### **Browser Interface Features**:
+- Tab management (add/close/switch tabs)
+- Address bar with navigation controls (←, →, ↻)
+- Fullscreen toggle
+- Shortcut tiles (Hidden Wiki, ProtonMail, Wallet, Check IP)
+
+---
+
+### **2. Frontend JavaScript** (app.js)
+
+#### **Key DOM Elements**:
+```javascript
+consoleOutput, statusIndicator, onionConnectBtn, onionDisconnectBtn,
+circuitDisplay, container, browserInterface, togglePanelBtn, fullscreenBtn
+```
+
+#### **State Variables**:
+- `isPanelVisible` - Controls main panel visibility
+- `isFullscreen` - Browser fullscreen state
+
+#### **Core Functions**:
+
+| Function | Lines | Purpose |
+|----------|-------|---------|
+| `log(message, type)` | 13-19 | Appends styled log to terminal |
+| `updateCircuitVisuals(stage)` | 21-52 | Animates circuit node progression (stages 0-5) |
+| Connection Handler | 54-104 | Builds circuit with visual animation |
+| Disconnect Handler | 106-166 | Animated teardown sequence |
+| Fullscreen Toggle | 204-232 | Uses Fullscreen API |
+| `BrowserManager` Class | 259-544 | Complete tab-based browser simulation |
+
+#### **BrowserManager Class Methods**:
+| Method | Description |
+|--------|-------------|
+| `addTab()` | Creates new browser tab |
+| `closeTab(id)` | Closes specified tab |
+| `switchTab(id)` | Activates selected tab |
+| `renderTabs()` | Updates tab bar UI |
+| `handleSearch(query)` | Navigates to search URL |
+| `handleShortcut(name)` | Opens predefined .onion links |
+| `navigate(url)` | Loads URL with history management |
+| `goBack()` / `goForward()` | History navigation |
+| `reload()` | Refreshes current page |
+| `loadUrl(tab, url)` | Shows loading animation then content |
+| `renderContent()` | Renders page content based on URL |
+
+#### **Predefined Shortcuts**:
+```javascript
+{
+    'Hidden Wiki': 'http://zqktlwi4fecvo6ri.onion/wiki/index.php/Main_Page',
+    'ProtonMail': 'https://protonirockerxow.onion/',
+    'Wallet': 'http://wallet.onion/',
+    'Check IP': 'https://check.torproject.org/'
+}
+```
+
+---
+
+### **3. CSS Styling** (style.css - 780 lines)
+
+#### **CSS Variables** (Theme Configuration):
+```css
+:root {
+    --bg-color: #050505;           /* Near-black background */
+    --text-color: #e0e0e0;         /* Light gray text */
+    --accent-color: #00ff41;       /* Neon green (Matrix style) */
+    --secondary-accent: #008F11;   /* Darker green */
+    --error-color: #ff0033;        /* Red for errors */
+    --panel-bg: rgba(10,10,10,0.95); /* Semi-transparent dark */
+    --grid-color: rgba(0,255,65,0.05); /* Grid overlay */
+}
+```
+
+#### **Visual Effects**:
+
+| Effect | Implementation | Location |
+|--------|----------------|----------|
+| CRT Scanlines | `::after` pseudo-element with gradient | `body::after` |
+| Grid Background | `background-image: linear-gradient` | `body` |
+| Floating Animation | `@keyframes float` (6s loop) | `.container` |
+| Data Flow | `@keyframes data-flow` (moving gradient) | `.connection-line.active::after` |
+| Pulse Effect | `@keyframes pulse-text` | `.status-indicator.active` |
+| Ripple Effect | `@keyframes ripple` | `.node-icon.active::after` |
+| Turn-on Effect | `@keyframes turn-on` (CRT-style) | `.browser-interface.visible` |
+| Spin Loader | `@keyframes spin` | `.loader` |
+| Fade In | `@keyframes fade-in` | `.log-line` |
+
+#### **UI Components Styled**:
+- Circuit node icons (60x60px circles)
+- Connection lines with animated data flow
+- Terminal window (macOS-style dots)
+- Cyber-styled buttons (clip-path polygon)
+- Browser tabs, address bar, shortcuts
+- Teardown animation (red flash)
+- Custom scrollbars
+
+---
+
+### **4. Additional Styles** (temp_style.css - 276 lines)
+
+Contains browser interface styles including:
+- Tab bar and navigation
+- Address bar with onion badge
+- Search box container
+- Shortcut icons
+- Welcome screen layout
+
+---
+
+## 🔐 **Security & Cryptography**
+
+### **Key Generation** (vpn_controller.js):
+```javascript
+// Uses X25519 curve (WireGuard standard)
+crypto.generateKeyPairSync('x25519', {
+    publicKeyEncoding: { format: 'pem', type: 'spki' },
+    privateKeyEncoding: { format: 'pem', type: 'pkcs8' }
+});
+
+// Actual keys are mock base64 (32 random bytes)
+const mockPriv = crypto.randomBytes(32).toString('base64');
+const mockPub = crypto.randomBytes(32).toString('base64');
+```
+
+### **Generated Keys** (client_keys.json):
+```json
+{
+    "privateKey": "rIf45UX9BGxYEFcvFJHh0VTSdZ+ZURKnktX+/we7bbE=",
+    "publicKey": "tHR0q1vha7YUdD/tP54PrkLEqusvrf0gnFMlGAHFEKI="
+}
+```
+
+---
+
+## ⚠️ **Important Observations**
+
+### **Simulation vs Reality**:
+
+| Feature | Implementation | Real Tor/VPN |
+|---------|----------------|--------------|
+| Circuit Nodes | Hardcoded mock IPs | Directory server with real nodes |
+| Handshake | `setTimeout` delays | Diffie-Hellman key exchange |
+| Encryption | None (simulated) | Multi-layer encryption |
+| Traffic Routing | Not implemented | Actual onion routing |
+| Exit Node | Mock IP | Real exit to internet |
+
+### **Code Observations**:
+
+1. **Unused Import**: `net` is imported in server.js but never used
+2. **Database Location**: SQLite file created in project root (not config)
+3. **Missing npm script**: package.json has `"main": "index.js"` but main file is server.js
+4. **Relay Server Standalone**: relay_server.js runs independently on port 9050
+5. **VPN Server Linux-only**: vpn_server_node.js requires Linux + WireGuard
+
+### **Potential Improvements**:
+1. Add actual cryptographic handshakes
+2. Implement real SOCKS5 proxy support
+3. Add WebSocket for real-time status updates
+4. Store database in config directory
+5. Add environment configuration
+6. Implement actual circuit-building logic
+
+---
+
+## 📊 **Code Statistics**
+
+| File | Lines | Type |
+|------|-------|------|
+| server.js | 88 | Backend |
+| db.js | 71 | Database |
+| vpn_controller.js | 56 | Cryptography |
+| relay_server.js | 42 | Network |
+| vpn_server_node.js | 72 | Server |
+| app.js | 544 | Frontend JS |
+| style.css | 780 | Styling |
+| temp_style.css | 276 | Styling |
+| index.html | 115 | UI |
+| **Total** | **~2,044** | - |
+
+---
+
+## 🚀 **Running the Project**
+
+### **Main Application**:
+```bash
+npm install
+node server.js
+# Open: http://localhost:3000
+```
+
+### **Relay Node** (Optional):
+```bash
+node relay_server.js
+# Listens on port 9050
+```
+
+### **VPN Server** (Linux VPS):
+```bash
+sudo node remote_server/vpn_server_node.js
+# Configures WireGuard interface wg0
+```
+
+---
+
+## 🎮 **User Experience Flow**
+
+1. **Initial State**: "UNSECURED" status, circuit nodes show "?"
+2. **Click "BUILD CIRCUIT"**:
+   - Keys generated (if first time)
+   - Nodes selected from mock directory
+   - Visual progression: YOU → ENTRY → RELAY → EXIT → WEB
+   - Status: "ANONYMOUS CIRCUIT ACTIVE"
+   - Browser interface appears in fullscreen
+3. **Browser Mode**:
+   - Navigate to .onion URLs
+   - Simulated "Connecting through 3 hops..."
+   - Mock content rendering
+4. **Click "STOP
